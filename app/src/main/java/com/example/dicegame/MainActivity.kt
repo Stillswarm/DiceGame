@@ -12,8 +12,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -39,27 +44,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = {
-                            Text(text = stringResource(R.string.dice_game))
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            titleContentColor = MaterialTheme.colorScheme.onPrimary
-                        )
-                    )
-                }
-            ) {
-                MainScreen(modifier = Modifier
-                    .padding(it)
-                    .fillMaxSize())
-            }
+                MainScreen()
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
     var currentScore by remember {
@@ -96,62 +86,98 @@ fun MainScreen(modifier: Modifier = Modifier) {
         5 -> R.drawable.dice_5
         else -> R.drawable.dice_6
     }
-    
-    Column(
-        modifier = modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = stringResource(R.string.dice_game))
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            )
+        },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = {
+                    roll1enabled = true
+                    roll2enabled = true
+                    roll3enabled = true
+                    currentScore = 0
+                    rollsCompleted = false
+                },
+                icon = { Icon(Icons.Filled.Refresh, "Extended floating action button.") },
+                text = { Text(text = "New Game") },
+                modifier = Modifier.padding(bottom = 36.dp)
+            )
+        },
+
+        floatingActionButtonPosition = FabPosition.Center
     ) {
-        Text(
-            text = "$scoreType Score: $currentScore",
-            fontSize = 24.sp,
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Image(
-            painter = painterResource(id = currentImage),
-            contentDescription = rollResult.toString()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        Column(
+            modifier = modifier.padding(it).fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Button(
-                onClick = {
-                    rollResult = (1..6).random()    //pick a random number
-                    currentScore += rollResult  //update current score
-                    roll1enabled = false    //to disable button after use
-                },
-                enabled = roll1enabled
-            ) {
-                Text(text = "Roll 1", fontSize = 20.sp)
-            }
+            Text(
+                text = "$scoreType Score: $currentScore",
+                fontSize = 24.sp,
+            )
 
-            Button(
-                onClick = {
-                    rollResult = (1..6).random()
-                    currentScore += rollResult
-                    roll2enabled = false
-                },
-                enabled = roll2enabled
-            ) {
-                Text(text = "Roll 2", fontSize = 20.sp)
-            }
+            Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
-                onClick = {
-                    rollResult = (1..6).random()
-                    currentScore += rollResult
-                    roll3enabled = false
-                    rollsCompleted = true   //all rolls are over
-                },
-                enabled = roll3enabled
+            Image(
+                painter = painterResource(id = currentImage),
+                contentDescription = rollResult.toString()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text(text = "Roll 3", fontSize = 20.sp)
+                Button(
+                    onClick = {
+                        rollResult = (1..6).random()    //pick a random number
+                        currentScore += rollResult  //update current score
+                        roll1enabled = false    //to disable button after use
+                    },
+                    enabled = roll1enabled
+                ) {
+                    Text(text = "Roll 1", fontSize = 20.sp)
+                }
+
+                Button(
+                    onClick = {
+                        rollResult = (1..6).random()
+                        currentScore += rollResult
+                        roll2enabled = false
+                    },
+                    enabled = roll2enabled
+                ) {
+                    Text(text = "Roll 2", fontSize = 20.sp)
+                }
+
+                Button(
+                    onClick = {
+                        rollResult = (1..6).random()
+                        currentScore += rollResult
+                        roll3enabled = false
+                        rollsCompleted = true   //all rolls are over
+                    },
+                    enabled = roll3enabled
+                ) {
+                    Text(text = "Roll 3", fontSize = 20.sp)
+                }
             }
         }
     }
+}
+
+@Preview
+@Composable
+private fun MainScreenPreview() {
+    MainScreen()
 }
