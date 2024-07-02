@@ -37,9 +37,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.max
 
 class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -53,6 +53,10 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
     var currentScore by remember {
+        mutableIntStateOf(0)
+    }
+
+    var highScore by remember {
         mutableIntStateOf(0)
     }
 
@@ -105,6 +109,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     roll1enabled = true
                     roll2enabled = true
                     roll3enabled = true
+                    highScore = max(highScore, currentScore)
                     currentScore = 0
                     rollsCompleted = false
                 },
@@ -121,9 +126,17 @@ fun MainScreen(modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+
+            Text(
+                text = "High Score: $highScore",
+                fontSize = 24.sp
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
             Text(
                 text = "$scoreType Score: $currentScore",
-                fontSize = 24.sp,
+                fontSize = 28.sp,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -166,6 +179,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                         currentScore += rollResult
                         roll3enabled = false
                         rollsCompleted = true   //all rolls are over
+                        highScore = max(highScore, currentScore)
                     },
                     enabled = roll3enabled
                 ) {
