@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -27,8 +28,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,7 +47,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-                MainScreen()
+            MainScreen()
         }
     }
 }
@@ -52,11 +55,13 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
+    val noOfRounds = 3  //should stay 3 till I find a better way
+
     var currentScore by remember {
         mutableIntStateOf(0)
     }
 
-    var highScore by remember {
+    var highScore by rememberSaveable {
         mutableIntStateOf(0)
     }
 
@@ -64,23 +69,15 @@ fun MainScreen(modifier: Modifier = Modifier) {
         mutableIntStateOf(6)
     }
 
-    var roll1enabled by remember {
-        mutableStateOf(true)
+    val rollEnabled = remember {
+        mutableStateListOf(true, true, true)
     }
 
-    var roll2enabled by remember {
-        mutableStateOf(true)
-    }
-
-    var roll3enabled by remember {
-        mutableStateOf(true)
-    }
-
-    var rollsCompleted by remember {
+    var allRollsCompleted by remember {
         mutableStateOf(false)
     }
 
-    val scoreType = if (rollsCompleted) "Final" else "Current"
+    val scoreType = if (allRollsCompleted) "Final" else "Current"
 
     val currentImage = when (rollResult) {
         1 -> R.drawable.dice_1
@@ -103,18 +100,17 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 )
             )
         },
+
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = {
-                    roll1enabled = true
-                    roll2enabled = true
-                    roll3enabled = true
+                    rollEnabled.fill(true)
                     highScore = max(highScore, currentScore)
                     currentScore = 0
-                    rollsCompleted = false
+                    allRollsCompleted = false
                 },
                 icon = { Icon(Icons.Filled.Refresh, "Extended floating action button.") },
-                text = { Text(text = "New Game") },
+                text = { Text(text = "New Game", fontSize = 20.sp) },
                 modifier = Modifier.padding(bottom = 36.dp)
             )
         },
@@ -122,7 +118,9 @@ fun MainScreen(modifier: Modifier = Modifier) {
         floatingActionButtonPosition = FabPosition.Center
     ) {
         Column(
-            modifier = modifier.padding(it).fillMaxSize(),
+            modifier = modifier
+                .padding(it)
+                .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -149,41 +147,27 @@ fun MainScreen(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Button(
-                    onClick = {
-                        rollResult = (1..6).random()    //pick a random number
-                        currentScore += rollResult  //update current score
-                        roll1enabled = false    //to disable button after use
-                    },
-                    enabled = roll1enabled
-                ) {
-                    Text(text = "Roll 1", fontSize = 20.sp)
-                }
 
-                Button(
-                    onClick = {
-                        rollResult = (1..6).random()
-                        currentScore += rollResult
-                        roll2enabled = false
-                    },
-                    enabled = roll2enabled
-                ) {
-                    Text(text = "Roll 2", fontSize = 20.sp)
-                }
+                for (i in (0..<noOfRounds)) {
+                    Button(
+                        onClick = {
+                            rollResult = (1..6).random()    //pick a random number
+                            currentScore += rollResult  //update current score
+                            rollEnabled[i] = false  //disable button after use
 
-                Button(
-                    onClick = {
-                        rollResult = (1..6).random()
-                        currentScore += rollResult
-                        roll3enabled = false
-                        rollsCompleted = true   //all rolls are over
-                        highScore = max(highScore, currentScore)
-                    },
-                    enabled = roll3enabled
-                ) {
-                    Text(text = "Roll 3", fontSize = 20.sp)
+                            //after last round
+                            if (i == noOfRounds - 1) {
+                                allRollsCompleted = true
+                                highScore = max(highScore, currentScore)
+                            }
+                        },
+                        enabled = rollEnabled[i]
+                    ) {
+                        Text(text = "Roll ${i + 1}", fontSize = 20.sp)
+                    }
                 }
             }
         }
