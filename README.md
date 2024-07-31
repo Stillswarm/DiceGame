@@ -1,8 +1,8 @@
 # Dice Game
 
 - A simple game of dice.
-- The user is allowed to roll a dice three times.
-- The user's total score is the sum of the results obtained in each of the three rolls.
+- The player is allowed to roll a dice three times.
+- The player's total score is the sum of the results obtained in each of the three rolls.
 
 ## Previews
 
