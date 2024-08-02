@@ -14,6 +14,7 @@ class GameViewModel : ViewModel() {
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
 
     private var lastResult = 6
+    private var MAX_TURNS: Int = 3
 
     fun rollDice() {
         val rollResult = pickNextValue()
@@ -68,13 +69,15 @@ class GameViewModel : ViewModel() {
     }
 
     fun allRollsCompleted(): Boolean {
-        return uiState.value.rollNo > uiState.value.maxNoOfTurns
+        return uiState.value.rollNo > MAX_TURNS
     }
 
     fun updateMaxTurns(newVal: Int) {
         _uiState.update {
             it.copy(maxNoOfTurns = newVal)
         }
+
+        refreshGame()
     }
 
     fun refreshGame() {
@@ -88,6 +91,8 @@ class GameViewModel : ViewModel() {
                 currentScoreLabel = "Current"
             )
         }
+
+        MAX_TURNS = uiState.value.maxNoOfTurns
     }
 
     init {

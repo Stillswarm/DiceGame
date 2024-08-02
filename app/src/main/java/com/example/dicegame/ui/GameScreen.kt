@@ -115,7 +115,6 @@ fun GameScreen(
                     contentDescription = null
                 )
 
-
                 Button(
                     onClick = gameViewModel::rollDice,
                     colors = ButtonDefaults.buttonColors(
